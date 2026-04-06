@@ -1,18 +1,19 @@
 import streamlit as st
 import os
-from dotenv import load_dotenv
 
-from langchain_text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.vectorstores import FAISS
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 
 from langchain.agents import Tool, initialize_agent
 from langgraph.graph import StateGraph
 
-load_dotenv()
-api_key = os.getenv("GROQ_API_KEY")
+api_key = st.secrets["GROQ_API_KEY"]
+if not api_key:
+    st.error("GROQ_API_KEY not found")
+    st.stop()
 
 llm = ChatGroq(
     api_key=api_key,
@@ -52,15 +53,15 @@ if uploaded_file:
 
     def json_tool(text):
         return llm.invoke(f"""
-        Extract info in JSON:
-        {{
-          "title": "",
-          "summary": "",
-          "keywords": []
-        }}
-        Text:
-        {text}
-        """).content
+Extract info in JSON:
+{{
+  "title": "",
+  "summary": "",
+  "keywords": []
+}}
+Text:
+{text}
+""").content
 
     tools = [
         Tool(name="Summarizer", func=summarize_tool, description="Summarizes content"),
@@ -86,7 +87,12 @@ if uploaded_file:
         return {"context": context, "query": state["query"]}
 
     def generate_answer(state):
-        response = agent.run(f"{state['context']}\n{state['query']}")
+        response = agent.run(f"""
+User question: {state['query']}
+
+Document:
+{state['context']}
+""")
         return {"answer": response}
 
     graph = StateGraph(State)
