@@ -9,3 +9,14 @@ pypdf
 python-dotenv
 sentence-transformers
 groq
+streamlit
+langchain
+langgraph
+langchain-community
+langchain-core
+langchain-groq
+langchain-text-splitters
+faiss-cpu
+pypdf
+python-dotenv
+sentence-transformers
