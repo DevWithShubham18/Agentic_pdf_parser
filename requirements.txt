@@ -8,3 +8,4 @@ faiss-cpu
 pypdf
 python-dotenv
 sentence-transformers
+groq
